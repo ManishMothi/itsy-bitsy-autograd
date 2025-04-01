@@ -22,7 +22,7 @@ class Value:
             self.grad += output.grad
             other.grad += output.grad
 
-        output._backward() = _backward
+        output._backward = _backward
         return output 
 
     def __mul__(self, other):
@@ -33,7 +33,7 @@ class Value:
             self.grad += other.data * output.grad
             other.grad += self.data * output.grad
 
-        output._backward() = _backward
+        output._backward = _backward
         return output 
 
     def __neg__(self):
@@ -49,7 +49,7 @@ class Value:
         def _backward():
             self.grad += (other * self.data ** (other - 1)) * output.grad
 
-        output._backward() = _backward
+        output._backward = _backward
 
         return output
     
@@ -76,7 +76,7 @@ class Value:
         def _backward():
             self.grad = (0 if output < 0 else output) * output.grad
 
-        output._backward() = _backward
+        output._backward = _backward
         return output 
     
     def tanh(self):
