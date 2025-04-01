@@ -1,4 +1,7 @@
 
+import math
+
+
 class Value:
     def __init__(self, data, _children=(), _operation=''):
         self.data = data
@@ -36,6 +39,33 @@ class Value:
         if other == 0:
             raise Exception("Cannot divide by zero")
         return self * other ** -1
+
+    def __rsub__(self, other):
+        return other + (-self)
+    
+    def __rmul__(self, other):
+        return other * self
+
+    def __radd__(self, other):
+        return other + self
+    
+    def __rtruediv__(self, other):
+        return other * self ** -1
+
+    def relu(self):
+        output = Value(0 if self.data < 0 else self.data, (self,), 'relu')
+        return output 
+    
+    def tanh(self):
+        x = self.data
+        tanh = (map.exp(2*x) - 1) / (math.exp(2*x) + 1)
+        output = Value(tanh, (self,), 'tanh')
+    
+        return output
+
+
+
+
     
 
     
