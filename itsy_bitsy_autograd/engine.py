@@ -62,10 +62,10 @@ class Value:
         return other + (-self)
     
     def __rmul__(self, other):
-        return other * self
+        return self * other
 
     def __radd__(self, other):
-        return other + self
+        return self + other
     
     def __rtruediv__(self, other):
         return other * self ** -1
@@ -81,9 +81,13 @@ class Value:
     
     def tanh(self):
         x = self.data
-        tanh = (map.exp(2*x) - 1) / (math.exp(2*x) + 1)
-        output = Value(tanh, (self,), 'tanh')
-    
+        t = (math.exp(2*x) - 1) / (math.exp(2*x) + 1)
+        output = Value(t, (self,), 'tanh')
+        
+        def _backward():
+            self.grad += (1 - t**2) * output.grad
+            
+        output._backward = _backward
         return output
 
     def backward(self):

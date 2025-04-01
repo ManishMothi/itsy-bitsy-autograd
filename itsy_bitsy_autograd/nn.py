@@ -11,8 +11,8 @@ class Module:
 
 class Neuron(Module):
 
-    def __init__(self, nin, nonlin=True):
-        self.w = [Value(random.uniform(-1, 1) for _ in range(nin))] # randomly initialize weights and bias
+    def __init__(self, nin):
+        self.w = [Value(random.uniform(-1, 1)) for _ in range(nin)] # randomly initialize weights and bias
         self.b = Value(random.uniform(-1, 1))
 
     def __call__(self, x):
@@ -25,9 +25,13 @@ class Neuron(Module):
 
     def parameters(self):
         return self.w + [self.b]
+
+    def __repr__(self):
+        return f"TanH Neuron({len(self.w)})"
+
     
 
-class Layer:
+class Layer(Module):
 
     def __init__(self, nin, nout):
         self.neurons = [Neuron(nin) for _ in range(nout)]
@@ -39,8 +43,10 @@ class Layer:
     def parameters(self):
         return [param for neuron in self.neurons for param in neuron.parameters()]        
 
+    def __repr__(self):
+        return f"Layer of [{', '.join(str(n) for n in self.neurons)}]"
 
-class MLP:
+class MLP(Module):
 
     def __init__(self, nin, nouts):
         sz = [nin] + nouts
@@ -53,3 +59,6 @@ class MLP:
     
     def parameters(self):
         return [param for layer in self.layers for param in layer.parameters()]
+
+    def __repr__(self):
+        return f"MLP of [{', '.join(str(layer) for layer in self.layers)}]"
