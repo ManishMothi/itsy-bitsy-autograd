@@ -17,11 +17,23 @@ class Value:
         other = other if isinstance(other, Value) else Value(other)
 
         output = Value(self.data + other.data, (self, other), '+')
+
+        def _backward():
+            self.grad += output.grad
+            other.grad += output.grad
+
+        output._backward() = _backward
         return output 
 
     def __mul__(self, other):
         other = other if isinstance(other, Value) else Value(other)
         output = Value(self.data * other.data, (self, other), '*')
+
+        def _backward():
+            self.grad += other.data * output.grad
+            other.grad += self.data * output.grad
+
+        output._backward() = _backward
         return output 
 
     def __neg__(self):
@@ -31,8 +43,14 @@ class Value:
         return self + (-other)
     
     def __pow__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
-        output = Value(self.data ** other.data, (self, other), f'**{other}')
+        assert isinstance(other, (int, float)), "only supports integer/float powers"
+        output = Value(self.data ** other, (self, ), f'**{other}')
+
+        def _backward():
+            self.grad += (other * self.data ** (other - 1)) * output.grad
+
+        output._backward() = _backward
+
         return output
     
     def __truediv__(self, other):
@@ -54,6 +72,11 @@ class Value:
 
     def relu(self):
         output = Value(0 if self.data < 0 else self.data, (self,), 'relu')
+
+        def _backward():
+            self.grad = (0 if output < 0 else output) * output.grad
+
+        output._backward() = _backward
         return output 
     
     def tanh(self):
@@ -62,6 +85,28 @@ class Value:
         output = Value(tanh, (self,), 'tanh')
     
         return output
+
+    def backward(self):
+        '''
+        Uses Topological sort for back prop.
+        Called on final value of computation 
+        '''
+        children = []
+        visited = set()
+        def build_top_sort(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._children:
+                    build_top_sort(child) # ensures top sort invariant 
+                children.append(v)
+                
+        build_top_sort(self)
+
+        self.grad = 1
+        for v in reversed(children):
+            v._backward()
+
+
 
 
 
